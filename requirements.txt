@@ -1,0 +1,22 @@
+# Web Framework
+fastapi
+uvicorn
+
+# LangChain Ecosystem
+langchain
+langchain-core
+langchain-community
+langchain-groq
+langchain-chroma
+langchain-huggingface
+
+# Vector Store & Embeddings
+chromadb
+sentence-transformers
+
+# Document Loaders
+pypdf
+
+# Utilities
+python-dotenv
+pydantic
