@@ -88,7 +88,7 @@ if prompt := st.chat_input("Ask a question about your PDF..."):
                 retriever = st.session_state.vector_store.as_retriever(search_kwargs={"k": 5})
 
                 llm = ChatGroq(
-                    model_name="llama-3.3-70b-versatile",
+                    model_name="llama-3.1-8b-instant",
                     temperature=0.3,
                     groq_api_key=groq_api_key
                 )
