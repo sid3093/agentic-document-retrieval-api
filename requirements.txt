@@ -1,7 +1,7 @@
-fastapi
-uvicorn
-httpx
-pytest
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+sentence-transformers
+streamlit
 langchain
 langchain-core
 langchain-community
@@ -11,4 +11,3 @@ langchain-huggingface
 chromadb
 pypdf
 python-dotenv
-streamlit
