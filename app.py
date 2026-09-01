@@ -86,16 +86,16 @@ if prompt := st.chat_input("Ask a question about your PDF..."):
         with st.spinner("Analyzing document..."):
             try:
                 retriever = st.session_state.vector_store.as_retriever(search_kwargs={"k": 5})
-
+                groq_api_key = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
                 if not groq_api_key:
                     st.error("CRITICAL: GROQ_API_KEY is missing from Streamlit Secrets!")
                     st.stop()
 
                 llm = ChatGroq(
-                model_name="llama-3.3-70b-versatile",
-                temperature=0.3,
-                api_key=groq_api_key
-            )
+                    model_name="llama-3.3-70b-versatile",
+                    temperature=0.3,
+                    api_key=groq_api_key
+                )
 
                 system_prompt = (
                     "You are an expert AI research assistant. Use the provided context to answer the user's question thoroughly.\n"
