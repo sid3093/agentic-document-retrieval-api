@@ -92,7 +92,7 @@ if prompt := st.chat_input("Ask a question about your PDF..."):
                     st.stop()
 
                 llm = ChatGroq(
-                model_name="llama-3.1-8b-instant",
+                model_name="llama-3.3-70b-versatile",
                 temperature=0.3,
                 api_key=groq_api_key
             )
