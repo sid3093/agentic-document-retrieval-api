@@ -14,6 +14,18 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# --- CRUCIAL FIX: Enable CORS ---
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # Allows Streamlit Cloud to connect
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+# --------------------------------
+
+os.makedirs("data", exist_ok=True)
+
 class QueryRequest(BaseModel):
     query:str
     history: List[Dict[str, str]] = []
@@ -27,7 +39,7 @@ class QueryResponse(BaseModel):
 @app.post("/ask",response_model=QueryResponse)
 async def ask_question(request:QueryRequest):
     try:
-        answer,docs=get_answer(request.query,request.history)
+        answer,docs=get_answer(request.query,request.history    )
         formatted_sources=[]
         for doc in docs:
             formatted_sources.append(

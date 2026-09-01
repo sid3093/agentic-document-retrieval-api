@@ -1,22 +1,14 @@
-# Web Framework
+streamlit
 fastapi
 uvicorn
-
-# LangChain Ecosystem
+python-multipart
 langchain
 langchain-core
 langchain-community
 langchain-groq
 langchain-chroma
 langchain-huggingface
-
-# Vector Store & Embeddings
-chromadb
 sentence-transformers
-
-# Document Loaders
+chromadb
 pypdf
-
-# Utilities
 python-dotenv
-pydantic
