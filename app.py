@@ -10,6 +10,7 @@ from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_mistralai import ChatMistralAI
 
 st.set_page_config(page_title="Agentic PDF Assistant", page_icon="📄", layout="wide")
 st.title("📄 Agentic PDF Assistant")
@@ -86,15 +87,17 @@ if prompt := st.chat_input("Ask a question about your PDF..."):
         with st.spinner("Analyzing document..."):
             try:
                 retriever = st.session_state.vector_store.as_retriever(search_kwargs={"k": 5})
-                groq_api_key = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
-                if not groq_api_key:
-                    st.error("CRITICAL: GROQ_API_KEY is missing from Streamlit Secrets!")
+                mistral_api_key = os.getenv("MISTRAL_API_KEY")
+                if not mistral_api_key and "MISTRAL_API_KEY" in st.secrets:
+                    mistral_api_key = st.secrets["MISTRAL_API_KEY"]
+                if not mistral_api_key:
+                    st.error("CRITICAL: MISTRAL_API_KEY is missing from Streamlit Secrets.")
                     st.stop()
 
-                llm = ChatGroq(
-                    model_name="llama-3.3-70b-versatile",
+                llm = ChatMistralAI(
+                    model="mistral-small-latest",
                     temperature=0.3,
-                    api_key=groq_api_key
+                    api_key=mistral_api_key
                 )
 
                 system_prompt = (

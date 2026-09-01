@@ -7,6 +7,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_classic.chains import create_retrieval_chain
 from langchain_classic.chains.combine_documents import create_stuff_documents_chain
 import re
+from langchain_mistralai import ChatMistralAI
 load_dotenv()
 CHROMA_PATH="chroma_db"
 embeddings=HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
@@ -15,10 +16,10 @@ vector_store=Chroma(
     embedding_function=embeddings
 )
 retriever=vector_store.as_retriever(search_kwargs={"k":4})
-llm=ChatGroq(
+llm = ChatMistralAI(
+    model="mistral-small-latest",
     temperature=0.3,
-    model_name="llama-3.3-70b-versatile",
-    reasoning_format="hidden"
+    api_key=os.getenv("MISTRAL_API_KEY")
 )
 system_prompt=(
     "You are an expert AI research assistant. Use the provided context to answer the user's question thoroughly.\n"

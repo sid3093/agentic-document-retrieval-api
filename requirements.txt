@@ -8,6 +8,7 @@ langchain-community
 langchain-groq
 langchain-chroma
 langchain-huggingface
+langchain-mistralai
 chromadb
 pypdf
 python-dotenv
