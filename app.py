@@ -71,6 +71,8 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # Query Processing
+# Replace your existing chain.invoke block with this:
+
 if prompt := st.chat_input("Ask a question about your PDF..."):
     if not st.session_state.vector_store:
         st.warning("Please upload a PDF document first.")
@@ -82,48 +84,49 @@ if prompt := st.chat_input("Ask a question about your PDF..."):
 
     with st.chat_message("assistant"):
         with st.spinner("Analyzing document..."):
-            retriever = st.session_state.vector_store.as_retriever(search_kwargs={"k": 5})
+            try:
+                retriever = st.session_state.vector_store.as_retriever(search_kwargs={"k": 5})
 
-            # LLM setup using Qwen via Groq
-            llm = ChatGroq(
-                temperature=0.3,
-                model_name="qwen-qwq-32b",
-                max_tokens=8000,
-                groq_api_key=groq_api_key
-            )
+                llm = ChatGroq(
+                    model_name="llama-3.3-70b-versatile",
+                    temperature=0.3,
+                    groq_api_key=groq_api_key
+                )
 
-            system_prompt = (
-                "You are an expert AI research assistant. Use the provided context to answer the user's question thoroughly.\n"
-                "If you don't know the answer based on the context, just say that you don't know.\n\n"
-                "Context: {context}"
-            )
+                system_prompt = (
+                    "You are an expert AI research assistant. Use the provided context to answer the user's question thoroughly.\n"
+                    "If you don't know the answer based on the context, just say that you don't know.\n\n"
+                    "Context: {context}"
+                )
 
-            prompt_template = ChatPromptTemplate.from_messages([
-                ("system", system_prompt),
-                ("human", "Conversation History:\n{history}\n\nNew Question: {input}"),
-            ])
+                prompt_template = ChatPromptTemplate.from_messages([
+                    ("system", system_prompt),
+                    ("human", "Conversation History:\n{history}\n\nNew Question: {input}"),
+                ])
 
-            history_str = ""
-            for msg in st.session_state.messages[:-1]:
-                role = "User" if msg["role"] == "user" else "AI"
-                history_str += f"{role}: {msg['content']}\n"
+                history_str = ""
+                for msg in st.session_state.messages[:-1]:
+                    role = "User" if msg["role"] == "user" else "AI"
+                    history_str += f"{role}: {msg['content']}\n"
 
-            chain = create_retrieval_chain(retriever, create_stuff_documents_chain(llm, prompt_template))
-            response = chain.invoke({"input": prompt, "history": history_str or "No previous history."})
+                chain = create_retrieval_chain(retriever, create_stuff_documents_chain(llm, prompt_template))
+                response = chain.invoke({"input": prompt, "history": history_str or "No previous history."})
 
-            # Strip reasoning tokens if generated
-            raw_answer = response["answer"]
-            clean_answer = re.sub(r"<think>.*?</think>", "", raw_answer, flags=re.DOTALL).strip()
+                raw_answer = response["answer"]
+                clean_answer = re.sub(r"<think>.*?</think>", "", raw_answer, flags=re.DOTALL).strip()
 
-            st.markdown(clean_answer)
-            st.session_state.messages.append({"role": "assistant", "content": clean_answer})
+                st.markdown(clean_answer)
+                st.session_state.messages.append({"role": "assistant", "content": clean_answer})
 
-            # Update Sources in the sidebar
-            if "context" in response:
-                with st.sidebar:
-                    st.divider()
-                    st.markdown("**Sources for latest query:**")
-                    for i, doc in enumerate(response["context"]):
-                        page = doc.metadata.get("page", "Unknown")
-                        with st.expander(f"Source {i+1} (Page {page})"):
-                            st.write(doc.page_content)
+                if "context" in response:
+                    with st.sidebar:
+                        st.divider()
+                        st.markdown("**Sources for latest query:**")
+                        for i, doc in enumerate(response["context"]):
+                            page = doc.metadata.get("page", "Unknown")
+                            with st.expander(f"Source {i+1} (Page {page})"):
+                                st.write(doc.page_content)
+                                
+            except Exception as e:
+                # THIS WILL PRINT THE EXACT GROQ ERROR TO YOUR SCREEN IN RED
+                st.error(f"DETAILED ERROR: {str(e)}")
