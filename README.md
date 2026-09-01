@@ -2,6 +2,8 @@
 
 A Retrieval-Augmented Generation (RAG) API built with FastAPI, LangChain, ChromaDB, HuggingFace Embeddings, and Groq LLM. It ingests PDF documents, creates vector store embeddings, and serves a query endpoint that returns grounded answers alongside source page citations.
 
+YOU CAN VISIT THIS WEBSITE TO USE THE PROGRAM --> https://agentic-document-retrieval.streamlit.app/
+
 ---
 
 ## Features

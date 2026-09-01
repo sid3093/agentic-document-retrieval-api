@@ -17,7 +17,7 @@ vector_store=Chroma(
 retriever=vector_store.as_retriever(search_kwargs={"k":4})
 llm=ChatGroq(
     temperature=0.3,
-    model_name="qwen/qwen3.6-27b",
+    model_name="qwen/qwen3-32b",
     max_tokens=2048,
     reasoning_format="hidden"
 )
