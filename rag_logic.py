@@ -18,7 +18,6 @@ retriever=vector_store.as_retriever(search_kwargs={"k":4})
 llm=ChatGroq(
     temperature=0.3,
     model_name="llama-3.3-70b-versatile",
-    max_tokens=8000,
     reasoning_format="hidden"
 )
 system_prompt=(
