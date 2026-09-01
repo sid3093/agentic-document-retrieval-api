@@ -17,7 +17,7 @@ vector_store=Chroma(
 )
 retriever=vector_store.as_retriever(search_kwargs={"k":4})
 llm = ChatMistralAI(
-    model="mistral-large-latest",
+    model="mistral-medium-latest",
     temperature=0.3,
     api_key=os.getenv("MISTRAL_API_KEY")
 )

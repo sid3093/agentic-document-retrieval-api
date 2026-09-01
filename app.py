@@ -95,7 +95,7 @@ if prompt := st.chat_input("Ask a question about your PDF..."):
                     st.stop()
 
                 llm = ChatMistralAI(
-                    model="mistral-large-latest",
+                    model="mistral-medium-latest",
                     temperature=0.3,
                     api_key=mistral_api_key
                 )
