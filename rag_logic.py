@@ -14,33 +14,44 @@ vector_store=Chroma(
     persist_directory=CHROMA_PATH,
     embedding_function=embeddings
 )
-retriever=vector_store.as_retriever(search_kwargs={"k":3})
+retriever=vector_store.as_retriever(search_kwargs={"k":4})
 llm=ChatGroq(
-    temperature=0,
-    model_name="qwen/qwen3.6-27b"
+    temperature=0.3,
+    model_name="qwen/qwen3.6-27b",
+    max_tokens=2048,
+    reasoning_format="hidden"
 )
 system_prompt=(
-    "You are an intelligent AI assistant. Use the following pieces of retrieved "
-    "context to answer the question. If you don't know the answer based on the "
-    "context, just say that you don't know. Keep the answer concise and clear.\n\n"
+    "You are an expert AI research assistant. Use the provided context to answer the user's question thoroughly.\n"
+    "If you don't know the answer based on the context, just say that you don't know.\n\n"
     "Context: {context}"
 )
 prompt=ChatPromptTemplate.from_messages([
     ("system",system_prompt),
-    ("human","{input}"),
+    ("human","Conversation History:\n{history}\n\nNew Question: {input}"),
 ])
 question_answer_chain=create_stuff_documents_chain(llm,prompt)
 rag_chain=create_retrieval_chain(retriever,question_answer_chain)
-def get_answer(query: str):
-    print(f"\nThinking about: '{query}'...")
-    response = rag_chain.invoke({"input": query})
+def get_answer(query: str, history: list = []):
+    history_string = ""
+    for msg in history:
+        role = "User" if msg["role"] == "user" else "AI"
+        history_string += f"{role}: {msg['content']}\n"
+
     
-    answer = response["answer"]
+    if not history_string:
+        history_string = "No previous history."
+
+    # Invoke the chain, passing in the input AND the history
+    response = rag_chain.invoke({
+        "input": query,
+        "history": history_string
+    })
     
-    answer = re.sub(r'<think>.*?</think>\n*', '', answer, flags=re.DOTALL).strip()
+    raw_answer = response["answer"]
+    clean_answer = re.sub(r"<think>.*?</think>", "", raw_answer, flags=re.DOTALL).strip()
     
-    sources = response["context"]
-    return answer, sources
+    return clean_answer, response["context"]
 if __name__=="__main__":
     test_query="what is this document about?give me a brief summary"
     ans,docs=get_answer(test_query)

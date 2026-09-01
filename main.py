@@ -1,8 +1,12 @@
-from fastapi import FastAPI, HTTPException
+import os
+import shutil
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from pydantic import BaseModel
 from typing import List, Dict, Any
 
 from rag_logic import get_answer
+from ingest import ingest_pdf
+
 
 app = FastAPI(
     title="Agentic RAG API",
@@ -12,6 +16,7 @@ app = FastAPI(
 
 class QueryRequest(BaseModel):
     query:str
+    history: List[Dict[str, str]] = []
 class SourceCitation(BaseModel):
     page_content:str
     metadata:Dict[str,Any]
@@ -22,7 +27,7 @@ class QueryResponse(BaseModel):
 @app.post("/ask",response_model=QueryResponse)
 async def ask_question(request:QueryRequest):
     try:
-        answer,docs=get_answer(request.query)
+        answer,docs=get_answer(request.query,request.history)
         formatted_sources=[]
         for doc in docs:
             formatted_sources.append(
@@ -37,6 +42,28 @@ async def ask_question(request:QueryRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500,detail=str(e))
+
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    try:
+        os.makedirs("data", exist_ok=True)
+        file_path = f"data/{file.filename}"
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        
+        ingest_pdf(file_path)
+        
+        return {"filename": file.filename, "message": "File successfully uploaded and vectorized!"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/")
+async def root():
+    return {"message": "Agentic RAG API is running. Visit /docs for the API documentation."}
+
 @app.get("/health")
 async def health_check():
     return {"status":"healthy","message":"api is running"}
+
+
